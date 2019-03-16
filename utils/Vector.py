@@ -43,7 +43,7 @@ class Vector(tuple):
         return Vector(*[i*j for i,j in zip(self,v)])
 
 
-class Position2D(Vector):
+class Vector2D(Vector):
 
     @property
     def x(self):
@@ -63,5 +63,5 @@ class Position2D(Vector):
 
 if __name__ == "__main__":
     v = Vector(0,1,2)
-    p = Position2D(1,2)
+    p = Vector2D(1,2)
     print(p+(1,2))
