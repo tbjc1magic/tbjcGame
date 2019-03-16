@@ -21,8 +21,18 @@ class Vector(tuple):
 
         return Vector(*[i+j for i,j in zip(self,v)])
 
-    def __div__(self,v):
+    def __floordiv__(self,v):
+        if not hasattr(v, '__len__'):
+            return Vector(*[_//v for _ in self])  
 
+        if len(self) != len(v):
+            raise Exception("The sizes of the two vectors are not matching")
+
+        return Vector(*[i//j for i,j in zip(self,v)])
+
+
+
+    def __truediv__(self,v):
         if not hasattr(v, '__len__'):
             return Vector(*[_/v for _ in self])  
 
@@ -64,4 +74,5 @@ class Vector2D(Vector):
 if __name__ == "__main__":
     v = Vector(0,1,2)
     p = Vector2D(1,2)
-    print(p+(1,2))
+    print(p//(1,2.))
+    #print(p+(1,2))
