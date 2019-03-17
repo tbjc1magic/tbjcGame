@@ -1,8 +1,8 @@
 import pygame
 
-def RoundedRect(rect,color,radius=0.4):
+def RoundedRect(size,color,radius=0.4):
 
-    rect         = pygame.Rect(rect)
+    rect         = pygame.Rect((0,0,*size))
     color        = pygame.Color(*color)
     alpha        = color.a
     color.a      = 0
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     s = pygame.Surface((400,400))  # the size of your rect
     s.set_alpha(100)                # alpha level
-    rr = RoundedRect((50,50,100,200),(0,0,255), 0.2)
+    rr = RoundedRect((100,200),(0,0,255), 0.2)
     s.blit(rr, (50,50))
     #s.fill((0,255,255)) 
     scr.blit(s, (0,0))
