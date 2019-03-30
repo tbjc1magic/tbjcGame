@@ -42,7 +42,7 @@ class MapManager():
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
         img = pygame.image.load(fPath)
         self.backgroundImage = pygame.transform.scale(img, size)
-        self.loc = loc
+        self.__loc = loc
 
         self.gridMap = _generateGridPaddedMap(size,nGrid, gridMargin=gridMargin, offset=offset)
 

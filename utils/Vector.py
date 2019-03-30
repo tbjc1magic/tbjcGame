@@ -63,14 +63,15 @@ class Vector(tuple):
 
 class Vector2D(Vector):
 
-    @property
-    def x(self):
-        return self[0]
+    def __getattr__(self,k):
+        if k in ['x','w','c']:
+            return self[0]
 
-    @property
-    def y(self):
-        return self[1]    
+        if k in ['y','h','r']:
+            return self[1]
         
+        raise Exception('unidentified attribute')
+
     def __new__(cls, *args):
         if len(args) != 2:
             raise Exception("wrong number of arguments for Position2D")
@@ -88,3 +89,5 @@ if __name__ == "__main__":
     print(2*p)
     print(p-1)
     print(1-p)
+
+    print(p.x,p.w)
