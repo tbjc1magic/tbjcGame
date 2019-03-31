@@ -1,11 +1,30 @@
 import pygame
+from utils.Vector import Vector2D
+
+class EventManager:
+
+    def __init__(self):
+        self.__childControllerList = []
+
+    def registerController(self, controller):
+        self.__childControllerList.append(controller)
 
 
-class SquareShapeController:
+    def passEventToChild(self, event):
+
+        eventTypeAccepted = [pygame.MOUSEBUTTONDOWN, 
+                             pygame.MOUSEBUTTONUP]
+        
+        if event.type in eventTypeAccepted:
+            for controller in self.__childControllerList:
+                controller.processEvent(event)
+
+class SquareShapeController(EventManager):
 
     def __init__(self, loc, size):
-        self.__size = size
-        self.__loc = loc
+        EventManager.__init__(self)
+        self.__size = Vector2D(*size)
+        self.__loc = Vector2D(*loc)
 
     def processEvent(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -19,10 +38,18 @@ class SquareShapeController:
                 rightClicked = getattr(self, 'rightClicked')
                 if callable(rightClicked): rightClicked()
 
+        if hasattr(event,'pos'):
+            event.pos = event.pos - self.__loc
+            self.passEventToChild(event)
+            event.pos = event.pos + self.__loc
+        else:
+            self.passEventToChild(event)
+
     def isInside(self, loc):
         (x,y),(w,h) = self.__loc, self.__size 
         if x<loc[0]<x+w and y<loc[1]<y+h: return True
         return False
+
 
 
 class Button(SquareShapeController):
@@ -47,13 +74,13 @@ class Button(SquareShapeController):
         self.selected = False
 
 
-class EventManager:
+class _EventManager:
 
     def __init__(self):
-        self.__controllerList = []
+        self.__childControllerList = []
 
     def registerController(self, controller):
-        self.__controllerList.append(controller)
+        self.__childControllerList.append(controller)
 
 
     def processEvents(self, events):
@@ -63,15 +90,14 @@ class EventManager:
         
         for event in events:
             if event.type in eventTypeAccepted:
-                for controller in self.__controllerList:
+                for controller in self.__childControllerList:
                     controller.processEvent(event)
-
 
 
 class RunManager:
     def __init__(self):
         pygame.init()
-        self.__eventManager = EventManager()
+        self.__eventManager = _EventManager()
 
     def terminate(self):
         self.runStatus = False

@@ -10,7 +10,7 @@ class Vector(tuple):
         return super().__new__(cls, args)
 
     def __rsub__(self,v):
-        return self.__sub__(v)*-1
+        return self.__sub__(Vector(*v))*-1
 
     def __sub__(self, v):
         return self.__add__(v*-1)

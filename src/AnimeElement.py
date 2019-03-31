@@ -9,11 +9,8 @@ class ImageManager(object):
         self.nSubImages = Vector2D(*nSubImages)
 
         size = Vector2D(*self.img.get_rect().size)
-
         self.subImageSize = size/nSubImages
-        print(self.subImageSize)
         self.imageOrigin = Vector2D(0,0)
-        #print(size, nSubImages, self.subImageSize)
 
     def drawSubImage(self, display, loc, imageIndex=(0,0)):
         
@@ -53,8 +50,6 @@ class AnimeElement:
 
         for i,s in enumerate(status):
             self.__imageDict[s] = {'shift':Vector2D(0,i),'imageManager':im, 'nFrames': nSubImages.w}
-
-        print(self.__imageDict)
 
 import os
 def main():

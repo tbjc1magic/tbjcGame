@@ -11,6 +11,7 @@ class Soldier(AnimeElement, SquareShapeController):
         self.character_size = Vector2D(48,64)
         self.canvasSize = self.subImageSize = (48,64)
         self.canvas = pygame.Surface(self.canvasSize, pygame.SRCALPHA)
+        self.showMenus = False
 
         AnimeElement.__init__(self, self.canvas, Vector2D(0,0))
         SquareShapeController.__init__(self, loc, self.subImageSize)
@@ -35,13 +36,13 @@ class Soldier(AnimeElement, SquareShapeController):
         print('right clicked')
 
 
-from .ButtonController import EventManager
+from .ButtonController import _EventManager
 
 
 class RunManager:
     def __init__(self):
         pygame.init()
-        self.__eventManager = EventManager()
+        self.__eventManager = _EventManager()
 
     def terminate(self):
         self.runStatus = False
