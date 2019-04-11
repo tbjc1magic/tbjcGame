@@ -22,10 +22,12 @@ class Soldier(AnimeElement, SquareShapeController):
                       status=['walk_down','walk_left','walk_right','walk_up'], 
                       nSubImages=Vector2D(4,4))
 
+        self.status = 'walk_down'
+
 
     def draw(self):
         self.canvas.fill((0,0,0))
-        self.drawFrame(None,'walk_right')
+        self.drawFrame(None,self.status)
         self.display.blit(self.canvas, self.loc)
 
 
