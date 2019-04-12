@@ -1,16 +1,17 @@
 
 
-from src.Character import Soldier
+from src.Character import Rider, Infantry
 from src.ButtonController import _EventManager, EventManager
 from src.Menu import Menu
 import pygame
 from utils.Vector import Vector2D
+from src.Map import MapManager
+
 
 class RunManager(EventManager):
     def __init__(self):
         pygame.init()
         EventManager.__init__(self)
-        #self.__eventManager = EventManager()
 
     def terminate(self):
         self.runStatus = False
@@ -29,8 +30,15 @@ class RunManager(EventManager):
         clock = pygame.time.Clock()
         self.__display = pygame.display.set_mode((800,600))
         menu = Menu(self.__display, ['attack','defend'], (250,50), (100,25))
-        soldier = Soldier(self.__display, (100,100))
-        self.registerController(soldier)
+        infantry = Infantry(self.__display, (100,100))
+        infantry.move([(100,100),(200,100),(300,100),(300,200),(400,200)])
+        rider = Rider(self.__display, (100,200))
+
+
+
+
+        self.registerController(infantry)
+        self.registerController(rider)
         self.registerController(menu)
 
         moves = []
@@ -43,7 +51,8 @@ class RunManager(EventManager):
             x +=5
             moves.append(('walk_right', Vector2D(x,y)))
 
-
+        flag = False 
+        flag1 = False
         i = 0
         runStatus = True
         while runStatus:
@@ -53,15 +62,26 @@ class RunManager(EventManager):
                     runStatus = False   
 
             self.__display.fill((0,0,0))
-            status, loc = moves[i]
-            soldier.status, soldier.loc = status, loc
-            i = (i+1)%len(moves)
+
+
+
+            #status, loc = moves[i]
+            #soldier.status, soldier.loc = status, loc
+            #i = (i+1)%len(moves)
+            #i = min(i+1, len(moves)-1)
             menu.draw()
-            soldier.draw()
+            if not infantry.draw():
+                flag = True
+            
+            if flag and not flag1:
+                rider.move([(100,200),(200,200),(300,200),(300,300),(400,300)])
+                flag1 = True
+
+            rider.draw()
             pygame.display.update()
             self.processEvents(events) 
 
-            clock.tick(5)
+            clock.tick(10)
 
 
 import os
