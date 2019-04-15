@@ -1,93 +1,55 @@
 
 
 from src.Character import Rider, Infantry
-from src.ButtonController import _EventManager, EventManager
 from src.Menu import Menu
 import pygame
 from utils.Vector import Vector2D
 from src.Map import MapManager
 
 
-class RunManager(EventManager):
+from src.RunManager import RunManager
+
+
+
+
+def LeftClicked(obj):
+    obj.loc = Vector2D(100,100)
+    obj.move([(100,100),(200,100),(300,100),(300,200),(400,200)])
+    print('am I here?')
+
+def moveCompleted(obj):
+    print('move completed')
+
+class GameManager(RunManager):
     def __init__(self):
-        pygame.init()
-        EventManager.__init__(self)
+        self.display = pygame.display.set_mode((48*15,64*15))
+        super().__init__()
 
-    def terminate(self):
-        self.runStatus = False
+    def setUpGame(self):
 
-    def processEvents(self, events):
+        mm = MapManager(self.display,
+                        loc=Vector2D(0,0),
+                        size=self.display.get_rect().size, 
+                        nGrid=(15,15),
+                        gridMargin=(1,1),
+                        offset=(1,1),
+                        fPath='data/map.JPG'
+        )    
 
-        eventTypeAccepted = [pygame.MOUSEBUTTONDOWN, 
-                             pygame.MOUSEBUTTONUP]
-        
-        for event in events:
-            if event.type in eventTypeAccepted:
-                self.passEventToChild(event)
+        self.registerController(mm)
 
-    def run(self):
-        
-        clock = pygame.time.Clock()
-        self.__display = pygame.display.set_mode((800,600))
-        menu = Menu(self.__display, ['attack','defend'], (250,50), (100,25))
-        infantry = Infantry(self.__display, (100,100))
-        infantry.move([(100,100),(200,100),(300,100),(300,200),(400,200)])
-        rider = Rider(self.__display, (100,200))
-
-
-
+        infantry = Infantry(self.display, (48*2,64*2))
+        infantry.registerCallBack('leftclick', LeftClicked)
+        infantry.registerCallBack('move_complete', LeftClicked)
+        #infantry.move([(100,100),(200,100),(300,100),(300,200),(400,200)])
+        rider = Rider(self.display, (48*2,64*4))
 
         self.registerController(infantry)
         self.registerController(rider)
-        self.registerController(menu)
 
-        moves = []
-        x,y = 100,100
-        for i in range(30):
-            y +=5
-            moves.append(('walk_down',Vector2D(x,y)))
-
-        for j in range(30):
-            x +=5
-            moves.append(('walk_right', Vector2D(x,y)))
-
-        flag = False 
-        flag1 = False
-        i = 0
-        runStatus = True
-        while runStatus:
-            events = pygame.event.get()
-            for event in events:
-                if event.type == pygame.QUIT:
-                    runStatus = False   
-
-            self.__display.fill((0,0,0))
-
-
-
-            #status, loc = moves[i]
-            #soldier.status, soldier.loc = status, loc
-            #i = (i+1)%len(moves)
-            #i = min(i+1, len(moves)-1)
-            menu.draw()
-            if not infantry.draw():
-                flag = True
-            
-            if flag and not flag1:
-                rider.move([(100,200),(200,200),(300,200),(300,300),(400,300)])
-                flag1 = True
-
-            rider.draw()
-            pygame.display.update()
-            self.processEvents(events) 
-
-            clock.tick(10)
-
-
-import os
 def main():
-    RunManager().run()
-
+    GameManager().run()
+  
 
 if __name__ == "__main__":
     main()

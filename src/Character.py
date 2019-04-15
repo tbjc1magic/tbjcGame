@@ -6,7 +6,6 @@ class Soldier(AnimeElement, SquareShapeController):
 
     def __init__(self, display, loc, fPath):
         
-        self.__loc = Vector2D(*loc)
         self.__display = display
         self.__character_size = Vector2D(48,64)
         self.__canvasSize = self.__subImageSize = (48,64)
@@ -23,9 +22,15 @@ class Soldier(AnimeElement, SquareShapeController):
         self.__status = 'walk_down'
         self.__moves = []
 
+        self.__callbacks = {}
+
+
+    def registerCallBack(self, key, func):
+        self.__callbacks[key] = func
+
     def move(self, route):
         speed = 20
-        moves = [(None,self.__loc)]
+        moves = [(None,self.loc)]
         status_dict = {(1,0):'walk_right', (-1,0):'walk_left', 
                        (0,1):'walk_down',  (0,-1):'walk_up'}
 
@@ -45,21 +50,30 @@ class Soldier(AnimeElement, SquareShapeController):
 
     def draw(self):
 
+        
         if self.__moves:
-            self.__status, self.__loc = self.__moves.pop(0)
+            isMove = True
+            self.__status, self.loc = self.__moves.pop(0)
+        else:
+            isMove = False
 
         self.__canvas.fill((0,0,0))
         self.drawFrame(None,self.__status)
-        self.__display.blit(self.__canvas, self.__loc)
-         
+        self.__display.blit(self.__canvas, self.loc)
+        
+        if isMove and len(self.__moves)==0 and 'move_complete' in self.__callbacks:
+            self.__callbacks['move_complete'](self)
+
         return len(self.__moves)>0
         
 
     def leftClicked(self):
-        print('here?')
+        if 'leftclick' in self.__callbacks:
+            self.__callbacks['leftclick'](self)
+
 
     def rightClicked(self):
-        print('right clicked')
+        pass
 
 
 class Rider(Soldier):
@@ -89,7 +103,7 @@ class RunManager:
         clock = pygame.time.Clock()
         self.__display = pygame.display.set_mode((800,600))
 
-        soldier = Soldier(self.__display, (100,100))
+        soldier = Soldier(self.__display, (100,100), 'data/infantry_walk.png')
         self.__eventManager.registerController(soldier)
 
         runStatus = True

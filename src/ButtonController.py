@@ -13,7 +13,8 @@ class EventManager:
     def passEventToChild(self, event):
 
         eventTypeAccepted = [pygame.MOUSEBUTTONDOWN, 
-                             pygame.MOUSEBUTTONUP]
+                             pygame.MOUSEBUTTONUP,
+                             pygame.MOUSEMOTION]
         
         if event.type in eventTypeAccepted:
             for controller in self.__childControllerList:
@@ -23,8 +24,9 @@ class SquareShapeController(EventManager):
 
     def __init__(self, loc, size):
         EventManager.__init__(self)
-        self.__size = Vector2D(*size)
-        self.__loc = Vector2D(*loc)
+        self.size = Vector2D(*size)
+        self.loc = Vector2D(*loc)
+        
 
     def processEvent(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -39,14 +41,14 @@ class SquareShapeController(EventManager):
                 if callable(rightClicked): rightClicked()
 
         if hasattr(event,'pos'):
-            event.pos = event.pos - self.__loc
+            event.pos = event.pos - self.loc
             self.passEventToChild(event)
-            event.pos = event.pos + self.__loc
+            event.pos = event.pos + self.loc
         else:
             self.passEventToChild(event)
 
     def isInside(self, loc):
-        (x,y),(w,h) = self.__loc, self.__size 
+        (x,y),(w,h) = self.loc, self.size 
         if x<loc[0]<x+w and y<loc[1]<y+h: return True
         return False
 
@@ -56,13 +58,13 @@ class Button(SquareShapeController):
 
     def __init__(self, top, loc, size):
 
-        self.__loc, self.__size = loc, size
+        #self.__loc, self.__size = loc, size
         SquareShapeController.__init__(self, loc, size)
         self.selected = False
         self.top = top
 
     def draw(self):
-        pygame.draw.rect(self.top, (0,0,255), (self.__loc[0], self.__loc[1], self.__size[0], self.__size[1]))
+        pygame.draw.rect(self.top, (0,0,255), (self.loc[0], self.loc[1], self.size[0], self.size[1]))
 
 
     def leftClicked(self):
@@ -86,7 +88,8 @@ class _EventManager:
     def processEvents(self, events):
 
         eventTypeAccepted = [pygame.MOUSEBUTTONDOWN, 
-                             pygame.MOUSEBUTTONUP]
+                             pygame.MOUSEBUTTONUP,
+                             pygame.MOUSEMOTION]
         
         for event in events:
             if event.type in eventTypeAccepted:

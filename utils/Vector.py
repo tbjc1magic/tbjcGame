@@ -32,7 +32,7 @@ class Vector(tuple):
         if len(self) != len(v):
             raise Exception("The sizes of the two vectors are not matching")
 
-        return Vector(*[i//j for i,j in zip(self,v)])
+        return Vector(*[int(i//j) for i,j in zip(self,v)])
 
 
 

@@ -18,6 +18,7 @@ class ImageManager(object):
         w,h = self.subImageSize
         display.blit(self.img, loc, (x,y,w,h))
 
+
 class AnimeElement:
     def __init__(self, display, loc):
         self.__display = display
@@ -50,6 +51,7 @@ class AnimeElement:
 
         for i,s in enumerate(status):
             self.__imageDict[s] = {'shift':Vector2D(0,i),'imageManager':im, 'nFrames': nSubImages.w}
+
 
 import os
 def main():
