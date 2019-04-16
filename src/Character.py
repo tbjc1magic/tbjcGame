@@ -2,17 +2,19 @@ from .AnimeElement import AnimeElement
 from .ButtonController import SquareShapeController
 import pygame
 from utils.Vector import Vector2D
+from src import Constant
 class Soldier(AnimeElement, SquareShapeController):   
 
     def __init__(self, display, loc, fPath):
         
         self.__display = display
-        self.__character_size = Vector2D(48,64)
-        self.__canvasSize = self.__subImageSize = (48,64)
-        self.__canvas = pygame.Surface(self.__canvasSize, pygame.SRCALPHA)
+        self.__character_size = Constant.cell_size
+        self.__canvasSize = self.__subImageSize = Constant.cell_size
+        self.__canvas = pygame.Surface(self.__canvasSize, pygame.SRCALPHA, 32)
         self.__showMenus = False
 
-        AnimeElement.__init__(self, self.__canvas, Vector2D(0,0))
+        AnimeElement.__init__(self, self.__canvas, Vector2D(0,0), 
+                            Constant.character_refresh_cycle)
         SquareShapeController.__init__(self, loc, self.__subImageSize)
         
         self.addImage(fPath, 
@@ -24,12 +26,11 @@ class Soldier(AnimeElement, SquareShapeController):
 
         self.__callbacks = {}
 
-
     def registerCallBack(self, key, func):
         self.__callbacks[key] = func
 
     def move(self, route):
-        speed = 20
+        speed = Constant.character_move_speed
         moves = [(None,self.loc)]
         status_dict = {(1,0):'walk_right', (-1,0):'walk_left', 
                        (0,1):'walk_down',  (0,-1):'walk_up'}
@@ -50,14 +51,14 @@ class Soldier(AnimeElement, SquareShapeController):
 
     def draw(self):
 
-        
+
         if self.__moves:
             isMove = True
             self.__status, self.loc = self.__moves.pop(0)
         else:
             isMove = False
 
-        self.__canvas.fill((0,0,0))
+        self.__canvas.fill((0,0,0,0))
         self.drawFrame(None,self.__status)
         self.__display.blit(self.__canvas, self.loc)
         

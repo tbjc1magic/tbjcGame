@@ -7,9 +7,9 @@ import abc
 
 class RunManager:
 
-    def __init__(self):
+    def __init__(self, size):
         pygame.init()
-        
+        self.display = pygame.display.set_mode(size)
         self.eventManager = EventManager()
         self.animeManager = AnimeManager(self.display)
         self.runStatus = True

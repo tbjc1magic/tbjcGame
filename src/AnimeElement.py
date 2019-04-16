@@ -20,12 +20,14 @@ class ImageManager(object):
 
 
 class AnimeElement:
-    def __init__(self, display, loc):
+    def __init__(self, display, loc, cycle=1):
         self.__display = display
         self.__imageDict ={}
         self.__lastStatus = None
         self.__lastFrame = None
         self.__loc = loc
+        self.__animeClock = -1
+        self.__animeCycle = cycle
 
     def drawFrame(self, loc=None, status=None, frameIndex=None):
         if loc is None: loc = self.__loc
@@ -41,7 +43,9 @@ class AnimeElement:
         if status != self.__lastStatus:
             self.__lastStatus, self.__lastFrame = status, -1
 
-        self.__lastFrame = (self.__lastFrame+1)%nFrames
+        self.__animeClock = (self.__animeClock+1)%self.__animeCycle
+        delta_frame = 0 if self.__animeClock else 1
+        self.__lastFrame = (self.__lastFrame+delta_frame)%nFrames
         im.drawSubImage(self.__display, loc, (self.__lastFrame, shift.y) )
         
     

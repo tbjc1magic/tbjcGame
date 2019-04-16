@@ -51,7 +51,7 @@ def _generateGridPaddedMap(mapSize, nGrid, omit=[]):
 
     return gridMapSurface
 
-
+from src import Constant
 class MapManager():
 
     def __init__(self, parentSurface, loc, size, nGrid, fPath, gridMargin=(3,3), offset=(2,2)):
@@ -66,6 +66,44 @@ class MapManager():
         self.fog = None
         self.nGrid = nGrid
         self.cursor_pos = None
+
+    def generateMoves(start, end):
+        import heapq
+        w,h = self.nGrid
+        mem = [[None]*w for _ in range(h)] 
+
+        visited = set([])
+        q = []
+        heapq.heappush(q, (0,start, None))
+
+        while q:
+            cost,cur,p = heapq.heappop(q)
+            if cur in visited: continue
+            mem[cur[1]][cur[0]] = p
+            visited.add(cur)
+            for d in [(1,0),(-1,0),(0,1),(0,-1)]:
+                nxt = cur+d
+                if not 0<=nxt[0]<w or not 0<=nxt[1]<h: continue
+                if nxt in visited: continue
+                ncost=cost+1
+                if p and d != cur-p: ncost+=1
+                heapq.heappush(q, (ncost,nxt,cur))
+
+        if mem[end.y][end.x] is None: return []
+
+        moves = [end]
+        while moves[-1] != start:
+            c = moves[-1]
+            moves.append(mem[c[1]][c[0]])
+        
+        return moves
+
+    def getAvailability(self, chessPos):
+        #### for now always available
+        return True
+
+    def getMapPosition(self, chessPos):
+        return Constant.cell_size*chessPos
 
     def draw(self):
         #self.surface.blit(self.backgroundImage, (0,0))
