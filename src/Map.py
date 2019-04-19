@@ -52,22 +52,29 @@ def _generateGridPaddedMap(mapSize, nGrid, omit=[]):
     return gridMapSurface
 
 from src import Constant
-class MapManager():
+from src.ButtonController import SquareShapeController
+class MapManager(SquareShapeController):
 
     def __init__(self, parentSurface, loc, size, nGrid, fPath, gridMargin=(3,3), offset=(2,2)):
+        
+        SquareShapeController.__init__(self, loc, size)
         self.parentSurface = parentSurface    
         self.surface = pygame.Surface(size, pygame.SRCALPHA)
         img = pygame.image.load(fPath)
-        self.size = Vector2D(*size)
+        #self.size = Vector2D(*size)
         self.backgroundImage = pygame.transform.scale(img, size)
-        self.loc = loc
+        #self.loc = loc
         self.gridSize = Vector2D(*size)/nGrid
         #self.fog = _generateGridPaddedMap(size,nGrid, omit=[])
         self.fog = None
         self.nGrid = nGrid
         self.cursor_pos = None
+        self.availability = [[1]*nGrid[1] for _ in range(nGrid[0])]
 
-    def generateMoves(start, end):
+        self.registerCallBack('hover', self.hoverOver)
+
+    def generateMoves(self, start, end):
+        
         import heapq
         w,h = self.nGrid
         mem = [[None]*w for _ in range(h)] 
@@ -85,25 +92,38 @@ class MapManager():
                 nxt = cur+d
                 if not 0<=nxt[0]<w or not 0<=nxt[1]<h: continue
                 if nxt in visited: continue
+                if not self.getAvailability(nxt): continue
+
                 ncost=cost+1
                 if p and d != cur-p: ncost+=1
+                
                 heapq.heappush(q, (ncost,nxt,cur))
 
-        if mem[end.y][end.x] is None: return []
+        if mem[end[0]][end[1]] is None: return []
 
         moves = [end]
         while moves[-1] != start:
             c = moves[-1]
             moves.append(mem[c[1]][c[0]])
         
-        return moves
+        return [_*Constant.cell_size for _ in moves[::-1]]
+
+    def markOccupied(self, chessPos):
+        chessPos = Vector2D(*chessPos)
+        self.availability[chessPos[0]][chessPos[1]] = 0
+
+    def markUnoccupied(self, chessPos):
+        chessPos = Vector2D(*chessPos)
+        self.availability[chessPos[0]][chessPos[1]] = 1
 
     def getAvailability(self, chessPos):
-        #### for now always available
-        return True
+        return self.availability[chessPos[0]][chessPos[1]]
 
     def getMapPosition(self, chessPos):
         return Constant.cell_size*chessPos
+
+    def getChessPosition(self, mapPosition):
+        return mapPosition//Constant.cell_size
 
     def draw(self):
         #self.surface.blit(self.backgroundImage, (0,0))
@@ -119,19 +139,16 @@ class MapManager():
 
 
 
-    def processEvent(self, event):
-
-        if event.type == pygame.MOUSEMOTION:
-            mouse_position = pygame.mouse.get_pos()
-            self.cursor_pos = Vector2D(*mouse_position)//self.gridSize
+    def hoverOver(self, mouse_position):
+        self.cursor_pos = Vector2D(*mouse_position)//self.gridSize
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                w,h = self.size
-                self.fog = _generateGridPaddedMap(self.size,self.nGrid, omit=[])
+        # if event.type == pygame.MOUSEBUTTONDOWN:
+        #     if event.button == 1:
+        #         w,h = self.size
+        #         self.fog = _generateGridPaddedMap(self.size,self.nGrid, omit=[])
 
-            if event.button == 3:
-                self.fog = None
+        #     if event.button == 3:
+        #         self.fog = None
 
 from .ButtonController import _EventManager
 

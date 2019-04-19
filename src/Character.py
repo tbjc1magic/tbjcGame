@@ -24,10 +24,7 @@ class Soldier(AnimeElement, SquareShapeController):
         self.__status = 'walk_down'
         self.__moves = []
 
-        self.__callbacks = {}
 
-    def registerCallBack(self, key, func):
-        self.__callbacks[key] = func
 
     def move(self, route):
         speed = Constant.character_move_speed
@@ -44,6 +41,7 @@ class Soldier(AnimeElement, SquareShapeController):
             dist = abs(diff[0])+abs(diff[1])
             dire = diff//dist
             nFrames = int(dist//speed)
+            
             for _ in range(nFrames): 
                 nxt_status = (status_dict[dire], dire*speed+moves[-1][1])
                 moves.append(nxt_status)
@@ -69,8 +67,8 @@ class Soldier(AnimeElement, SquareShapeController):
         
 
     def leftClicked(self):
-        if 'leftclick' in self.__callbacks:
-            self.__callbacks['leftclick'](self)
+        if 'left_click' in self.__callbacks:
+            self.__callbacks['left_click'](self)
 
 
     def rightClicked(self):

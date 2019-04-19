@@ -3,11 +3,20 @@ from utils.Vector import Vector2D
 
 class EventManager:
 
-    def __init__(self):
+    def __init__(self, firstReact=True, passToChildren=True):
         self.__childControllerList = []
+        self.__callbacks = {}
+        self.__firstReact = firstReact
+        self.__passToChildren = passToChildren
 
-    def registerController(self, controller):
-        self.__childControllerList.append(controller)
+    def registerController(self, controller, priority=-1):
+
+        self.__childControllerList.append((-priority, controller))
+        self.__childControllerList = sorted(self.__childControllerList, 
+                                            key=lambda _:_[0])
+
+    def registerCallBack(self, key, func):
+        self.__callbacks[key] = func
 
 
     def passEventToChild(self, event):
@@ -15,10 +24,49 @@ class EventManager:
         eventTypeAccepted = [pygame.MOUSEBUTTONDOWN, 
                              pygame.MOUSEBUTTONUP,
                              pygame.MOUSEMOTION]
-        
+        response = False
         if event.type in eventTypeAccepted:
-            for controller in self.__childControllerList:
-                controller.processEvent(event)
+            for _, controller in self.__childControllerList:
+                childResponse = controller.processEvent(event)
+                if self.__firstReact and childResponse: return True
+                response = childResponse or response
+        
+        return response
+
+    def processEvent(self, event):
+
+        if not self.isInside(loc = event.pos): return
+
+        response = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if 'left_click' in self.__callbacks:
+                    self.__callbacks['left_click'](self)
+                    response = True
+
+            if event.button == 3: 
+                if 'right_click' in self.__callbacks:
+                    self.__callbacks['right_click'](self)
+                    response = True
+
+        if event.type == pygame.MOUSEMOTION:
+            if 'hover' in self.__callbacks:
+                self.__callbacks['hover'](pygame.mouse.get_pos())
+                response = True
+        
+        if not self.__passToChildren: return response
+
+        childResponse = False
+        if hasattr(event,'pos'):
+            event.pos = event.pos - self.loc
+            childResponse = self.passEventToChild(event)
+            event.pos = event.pos + self.loc
+        else:
+            childResponse = self.passEventToChild(event)
+
+        return response or childResponse
+
+        
 
 class SquareShapeController(EventManager):
 
@@ -27,25 +75,6 @@ class SquareShapeController(EventManager):
         self.size = Vector2D(*size)
         self.loc = Vector2D(*loc)
         
-
-    def processEvent(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button==1  and \
-                self.isInside(loc = event.pos) and \
-                hasattr(self, 'leftClicked'):
-                leftClickMethod = getattr(self, 'leftClicked')
-                if callable(leftClickMethod): leftClickMethod()
-
-            if event.button==3 and hasattr(self, 'rightClicked'):
-                rightClicked = getattr(self, 'rightClicked')
-                if callable(rightClicked): rightClicked()
-
-        if hasattr(event,'pos'):
-            event.pos = event.pos - self.loc
-            self.passEventToChild(event)
-            event.pos = event.pos + self.loc
-        else:
-            self.passEventToChild(event)
 
     def isInside(self, loc):
         (x,y),(w,h) = self.loc, self.size 
@@ -66,14 +95,7 @@ class Button(SquareShapeController):
     def draw(self):
         pygame.draw.rect(self.top, (0,0,255), (self.loc[0], self.loc[1], self.size[0], self.size[1]))
 
-
-    def leftClicked(self):
-        print('leftClick triggered')
-        self.selected = True
     
-    def rightClicked(self):
-        print('rightClick triggered')
-        self.selected = False
 
 
 class _EventManager:
