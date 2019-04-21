@@ -18,6 +18,13 @@ class RunManager(SquareShapeController):
 
         self.eventManager.registerController(self)
 
+    def disableAllChildren(self):
+        self.eventManager.disableAllChildren()
+        self.enableResponse()
+
+    def enableAllChildren(self):
+        self.eventManager.enableAllChildren()
+
     def terminate(self):
         self.runStatus = False
 
@@ -34,6 +41,7 @@ class RunManager(SquareShapeController):
     def registerController(self, controller, animePriority=-1, eventPriority=-1):
         self.eventManager.registerController(controller, eventPriority)
         self.animeManager.registerController(controller, animePriority)
+
 
     @abc.abstractclassmethod
     def setUpGame(self):

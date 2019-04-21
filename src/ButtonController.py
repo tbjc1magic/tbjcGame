@@ -8,6 +8,22 @@ class EventManager:
         self.__callbacks = {}
         self.__firstReact = firstReact
         self.__passToChildren = passToChildren
+        self.__respond = True
+
+    def disableAllChildren(self):
+        for _, child in self.__childControllerList:
+            child.disableResponse()
+
+    def enableAllChildren(self):
+        for _, child in self.__childControllerList:
+            child.enableResponse()
+
+    def enableResponse(self):
+        self.__respond = True
+    
+    def disableResponse(self):
+        self.__respond = False
+
 
     def registerController(self, controller, priority=-1):
 
@@ -17,7 +33,6 @@ class EventManager:
 
     def registerCallBack(self, key, func):
         self.__callbacks[key] = func
-
 
     def passEventToChild(self, event):
 
@@ -34,7 +49,7 @@ class EventManager:
         return response
 
     def processEvent(self, event):
-
+        if not self.__respond: return
         if not self.isInside(loc = event.pos): return
 
         response = False

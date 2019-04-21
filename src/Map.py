@@ -37,7 +37,6 @@ def _generateGridPaddedMap(mapSize, nGrid, omit=[]):
     
     mapSize, nGrid = Vector2D(*mapSize), Vector2D(*nGrid)
     gridFullSize = mapSize//nGrid
-    #import ipdb; ipdb.set_trace()
 
     gridMapSurface = pygame.Surface(mapSize, pygame.SRCALPHA, 32)
     gridSurface = pygame.Surface(gridFullSize, pygame.SRCALPHA, 32)
@@ -45,8 +44,8 @@ def _generateGridPaddedMap(mapSize, nGrid, omit=[]):
 
     for r in range(nGrid[0]):
         for c in range(nGrid[1]):
+            if (r,c) in omit: continue
             loc = gridFullSize*(r,c)
-            
             gridMapSurface.blit(gridSurface, loc)
 
     return gridMapSurface
@@ -126,9 +125,8 @@ class MapManager(SquareShapeController):
         return mapPosition//Constant.cell_size
 
     def draw(self):
-        #self.surface.blit(self.backgroundImage, (0,0))
         self.surface.fill((0,0,0))
-        if self.fog: self.surface.blit(self.fog, (0,0))
+        
         
         self.parentSurface.blit(self.surface, (0,0))
 
@@ -136,19 +134,25 @@ class MapManager(SquareShapeController):
             left_top = self.cursor_pos*self.gridSize
             pygame.draw.rect(self.parentSurface,(255,255,255),(*left_top, *self.gridSize),3)
 
-
-
-
     def hoverOver(self, mouse_position):
         self.cursor_pos = Vector2D(*mouse_position)//self.gridSize
         
-        # if event.type == pygame.MOUSEBUTTONDOWN:
-        #     if event.button == 1:
-        #         w,h = self.size
-        #         self.fog = _generateGridPaddedMap(self.size,self.nGrid, omit=[])
 
-        #     if event.button == 3:
-        #         self.fog = None
+
+class NaviationMap(SquareShapeController):
+    def __init__(self, parentSurface, loc, size):
+        self.show = False
+        SquareShapeController.__init__(self, loc, size)
+        self.parentSurface = parentSurface
+        self.nGrid = size//Constant.cell_size
+        self.omit = None
+
+    def draw(self):
+        if not self.show: return
+        #import ipdb; ipdb.set_trace()
+        navigation = _generateGridPaddedMap(self.size, self.nGrid, omit=self.omit)
+        self.parentSurface.blit(navigation, (0,0))
+
 
 from .ButtonController import _EventManager
 
@@ -170,7 +174,7 @@ def main():
     pygame.display.update()
     while pygame.event.wait().type != pygame.QUIT: pass
 
-class RunManager:
+class RunManager(SquareShapeController):
     def __init__(self):
         pygame.init()
         self.__eventManager = _EventManager()

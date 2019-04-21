@@ -1,6 +1,6 @@
 
 
-from src.Character import Rider, Infantry
+from src.Character import Rider, Infantry, Soldier
 from src.Menu import Menu
 import pygame
 from utils.Vector import Vector2D
@@ -14,27 +14,50 @@ def leftClicked(obj, host):
     #obj.loc = Vector2D(100,100)
     #obj.move([(100,100),(200,100),(300,100),(300,200),(400,200)])
     #import ipdb; ipdb.set_trace()
-    print(obj)
 
+    if not isinstance(obj, Soldier): return
+
+    host.navigationMap.show = True
+    host.disableAllChildren()
+    host.mapManager.enableResponse()
+    
+    omit = [obj.chessPos, obj.chessPos+(0,1), obj.chessPos+(0,-1), obj.chessPos+(1,0),
+            obj.chessPos+(-1,0)]
+
+    host.navigationMap.omit = omit
 
 def moveCompleted(obj, host):
     pass
 
 def rightClicked(obj, host):
-    print(obj)
+    
+    host.navigationMap.show = False
+    host.enableAllChildren()
 
 import functools
 from src import Constant
+from src.Map import NaviationMap
 class GameManager(RunManager):
     def __init__(self):
 
         self.gridSize = Constant.cell_size
-        super().__init__(self.gridSize*(15,15))
+        nGrid = Vector2D(10,10)
+        super().__init__(self.gridSize*nGrid)
+        size = Vector2D(*self.display.get_rect().size)
 
+
+        ### navigation map
+        self.navigationMap = NaviationMap(self.display,
+                                          loc=Vector2D(0,0), 
+                                          size=size)
+
+        self.registerController(self.navigationMap, animePriority=100)
+
+        ### get a map
         self.mapManager = MapManager(self.display,
                                     loc=Vector2D(0,0),
-                                    size=self.display.get_rect().size, 
-                                    nGrid=(15,15),
+                                    size=size, 
+                                    nGrid=nGrid,
                                     gridMargin=(1,1),
                                     offset=(1,1),
                                     fPath='data/map.JPG')
@@ -43,6 +66,8 @@ class GameManager(RunManager):
                                 eventPriority=-100)
         callback = functools.partial(leftClicked, host=self)
         self.mapManager.registerCallBack('left_click', callback)
+
+        self.focus = None
 
 
     def initializeCharacter(self, cls, chess_pos):

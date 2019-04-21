@@ -24,7 +24,9 @@ class Soldier(AnimeElement, SquareShapeController):
         self.__status = 'walk_down'
         self.__moves = []
 
-
+    @property
+    def chessPos(self):
+        return self.loc//Constant.cell_size
 
     def move(self, route):
         speed = Constant.character_move_speed
@@ -77,11 +79,16 @@ class Soldier(AnimeElement, SquareShapeController):
 
 class Rider(Soldier):
     def __init__(self, display, loc):
+        self.range = 3
+        #self.chessPos = Vector2D()
         fPath = 'data/rider_walk.png'
         Soldier.__init__(self, display, loc, fPath)
 
+
+
 class Infantry(Soldier):
     def __init__(self, display, loc):
+        self.range = 2
         fPath = 'data/infantry_walk.png'
         Soldier.__init__(self, display, loc, fPath)
 
